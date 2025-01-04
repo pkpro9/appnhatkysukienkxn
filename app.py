@@ -121,7 +121,7 @@ if st.button("Lưu vào Google Docs"):
         try:
             # ID của Google Docs từ link bạn cung cấp
             doc_id = "1YRqAYASyH72iDfxnlFPaXwpnOlWp0A3XctIdwB8qcWI"
-            write_to_google_docs(doc_id, event_date, event_content)
+            write_to_google_docs(doc_id, st.session_state.event_date, event_content)
             st.success("Đã lưu thành công vào Google Docs!")
             st.session_state.event_content = ""  # Reset nội dung sau khi lưu
         except Exception as e:
@@ -131,4 +131,4 @@ if st.button("Lưu vào Google Docs"):
 if st.button("Tạo mới"):
     st.session_state.event_content = ""  # Reset nội dung sự kiện
     timezone = pytz.timezone("Asia/Ho_Chi_Minh")
-    st.session_state.event_date = datetime.now(timezone).strftime("%d-%m-%Y %H:%M:%S")
+    st.session_state.event_date = datetime.now(timezone).strftime("%d-%m-%d %Y:%M:%S")
