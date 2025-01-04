@@ -97,7 +97,7 @@ def write_to_google_docs(doc_id, date, content):
     service.documents().batchUpdate(documentId=doc_id, body={"requests": requests}).execute()
 
 # Giao diện Streamlit
-st.title("Nhật ký sự kiện khoa xét nghiệm")
+st.title("Nhật ký sự kiện Khoa XN")
 
 # Trạng thái ứng dụng
 if "event_content" not in st.session_state:
