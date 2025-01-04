@@ -6,17 +6,18 @@ import streamlit as st
 
 # Hàm đọc thông tin từ Streamlit Secrets
 def get_credentials_from_secrets():
-    # Lấy nội dung từ Streamlit Secrets
-    credentials_json = st.secrets["GOOGLE_CREDENTIALS"]
-    if not credentials_json:
+    try:
+        # Lấy nội dung từ Streamlit Secrets
+        credentials_json = st.secrets["GOOGLE_CREDENTIALS"]
+        # Chuyển nội dung JSON thành dictionary
+        credentials_info = json.loads(credentials_json)
+        # Tạo thông tin xác thực từ dictionary
+        credentials = Credentials.from_service_account_info(credentials_info)
+        return credentials
+    except KeyError:
         raise ValueError("GOOGLE_CREDENTIALS không được tìm thấy trong Streamlit Secrets!")
-    
-    # Chuyển nội dung JSON thành dictionary
-    credentials_info = json.loads(credentials_json)
-    
-    # Tạo thông tin xác thực từ dictionary
-    credentials = Credentials.from_service_account_info(credentials_info)
-    return credentials
+    except json.JSONDecodeError:
+        raise ValueError("Dữ liệu GOOGLE_CREDENTIALS không hợp lệ!")
 
 # Hàm kết nối đến Google Docs API
 def connect_to_google_docs():
@@ -28,7 +29,7 @@ def connect_to_google_docs():
 def get_current_entry_number(doc_id):
     service = connect_to_google_docs()
     document = service.documents().get(documentId=doc_id).execute()
-    content = document.get("body").get("content")
+    content = document.get("body").get("content", [])
 
     # Ghép nội dung thành chuỗi văn bản nếu có nội dung
     text = ""
@@ -56,7 +57,7 @@ def write_to_google_docs(doc_id, date, content):
     entry_number = get_current_entry_number(doc_id)
     document = service.documents().get(documentId=doc_id).execute()
     # Kiểm tra vị trí cuối nếu tài liệu rỗng
-    end_index = document.get("body").get("content")[-1].get("endIndex") - 1 if len(document.get("body").get("content")) > 1 else 1
+    end_index = document.get("body").get("content")[-1].get("endIndex", 1) - 1 if document.get("body").get("content") else 1
 
     # Định dạng nội dung
     formatted_content = "\n".join([f"- {line}" for line in content.split("\n")])
