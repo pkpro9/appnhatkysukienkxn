@@ -5,12 +5,12 @@ from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 import streamlit as st
 
-# Hàm đọc và giải mã thông tin tài khoản từ biến môi trường
-def get_credentials_from_env():
-    # Lấy chuỗi Base64 từ biến môi trường GOOGLE_CREDENTIALS
-    encoded_json = os.getenv("GOOGLE_CREDENTIALS")
+# Hàm đọc và giải mã thông tin tài khoản từ Streamlit Secrets
+def get_credentials_from_secrets():
+    # Lấy chuỗi Base64 từ Streamlit Secrets
+    encoded_json = st.secrets["GOOGLE_CREDENTIALS"]
     if not encoded_json:
-        raise ValueError("Biến môi trường GOOGLE_CREDENTIALS không tồn tại!")
+        raise ValueError("GOOGLE_CREDENTIALS không được tìm thấy trong secrets.")
     
     # Giải mã chuỗi Base64 để tái tạo nội dung file JSON
     json_data = base64.b64decode(encoded_json).decode("utf-8")
@@ -21,7 +21,7 @@ def get_credentials_from_env():
 
 # Hàm kết nối đến Google Docs API
 def connect_to_google_docs():
-    credentials = get_credentials_from_env()
+    credentials = get_credentials_from_secrets()
     service = build("docs", "v1", credentials=credentials)
     return service
 
