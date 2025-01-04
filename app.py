@@ -104,7 +104,7 @@ if "event_content" not in st.session_state:
     st.session_state.event_content = ""
 if "event_date" not in st.session_state:
     timezone = pytz.timezone("Asia/Ho_Chi_Minh")
-    st.session_state.event_date = datetime.now(timezone).strftime("%Y-%m-%d %H:%M:%S")
+    st.session_state.event_date = datetime.now(timezone).strftime("%d-%m-%Y %H:%M:%S")
 
 # Trường "Ngày" có thể chỉnh sửa
 event_date = st.text_input("Ngày:", value=st.session_state.event_date)
@@ -131,4 +131,4 @@ if st.button("Lưu vào Google Docs"):
 if st.button("Tạo mới"):
     st.session_state.event_content = ""  # Reset nội dung sự kiện
     timezone = pytz.timezone("Asia/Ho_Chi_Minh")
-    st.session_state.event_date = datetime.now(timezone).strftime("%Y-%m-%d %H:%M:%S")
+    st.session_state.event_date = datetime.now(timezone).strftime("%d-%m-%Y %H:%M:%S")
