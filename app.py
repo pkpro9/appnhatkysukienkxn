@@ -1,10 +1,10 @@
 import streamlit as st
 from datetime import datetime
+import pytz
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 
 # Hàm kết nối đến Google Docs API
-
 def connect_to_google_docs():
     # Sử dụng thông tin từ Secrets trên Streamlit Cloud
     credentials_info = {
@@ -103,8 +103,9 @@ st.title("Nhật ký sự kiện khoa xét nghiệm")
 if "event_content" not in st.session_state:
     st.session_state.event_content = ""
 
-# Trường "Ngày" tự động lấy thời gian thực
-current_datetime = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+# Lấy thời gian hiện tại theo múi giờ Việt Nam (UTC+7)
+timezone = pytz.timezone("Asia/Ho_Chi_Minh")
+current_datetime = datetime.now(timezone).strftime("%d-%m-%Y %H:%M:%S")
 st.write("Ngày:", current_datetime)
 
 # Trường nhập nội dung sự kiện
