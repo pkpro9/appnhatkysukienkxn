@@ -102,11 +102,13 @@ st.title("Nhật ký sự kiện khoa xét nghiệm")
 # Trạng thái ứng dụng
 if "event_content" not in st.session_state:
     st.session_state.event_content = ""
+if "event_date" not in st.session_state:
+    timezone = pytz.timezone("Asia/Ho_Chi_Minh")
+    st.session_state.event_date = datetime.now(timezone).strftime("%Y-%m-%d %H:%M:%S")
 
-# Lấy thời gian hiện tại theo múi giờ Việt Nam (UTC+7)
-timezone = pytz.timezone("Asia/Ho_Chi_Minh")
-current_datetime = datetime.now(timezone).strftime("%d-%m-%Y %H:%M:%S")
-st.write("Ngày:", current_datetime)
+# Trường "Ngày" có thể chỉnh sửa
+event_date = st.text_input("Ngày:", value=st.session_state.event_date)
+st.session_state.event_date = event_date
 
 # Trường nhập nội dung sự kiện
 event_content = st.text_area("Nội dung sự kiện", value=st.session_state.event_content)
@@ -119,7 +121,7 @@ if st.button("Lưu vào Google Docs"):
         try:
             # ID của Google Docs từ link bạn cung cấp
             doc_id = "1YRqAYASyH72iDfxnlFPaXwpnOlWp0A3XctIdwB8qcWI"
-            write_to_google_docs(doc_id, current_datetime, event_content)
+            write_to_google_docs(doc_id, event_date, event_content)
             st.success("Đã lưu thành công vào Google Docs!")
             st.session_state.event_content = ""  # Reset nội dung sau khi lưu
         except Exception as e:
@@ -128,3 +130,5 @@ if st.button("Lưu vào Google Docs"):
 # Nút "Tạo mới" để reset các trường nhập
 if st.button("Tạo mới"):
     st.session_state.event_content = ""  # Reset nội dung sự kiện
+    timezone = pytz.timezone("Asia/Ho_Chi_Minh")
+    st.session_state.event_date = datetime.now(timezone).strftime("%Y-%m-%d %H:%M:%S")
