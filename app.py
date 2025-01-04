@@ -131,4 +131,4 @@ if st.button("Lưu vào Google Docs"):
 if st.button("Tạo mới"):
     st.session_state.event_content = ""  # Reset nội dung sự kiện
     timezone = pytz.timezone("Asia/Ho_Chi_Minh")
-    st.session_state.event_date = datetime.now(timezone).strftime("%d-%m-%d %Y:%M:%S")
+    st.session_state.event_date = datetime.now(timezone).strftime("%d-%m-%Y %H:%M:%S")
