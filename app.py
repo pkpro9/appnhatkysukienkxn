@@ -1,27 +1,26 @@
-import json
+import streamlit as st
 from datetime import datetime
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
-import streamlit as st
-
-# Hàm đọc thông tin từ Streamlit Secrets
-def get_credentials_from_secrets():
-    try:
-        # Lấy nội dung từ Streamlit Secrets
-        credentials_json = st.secrets["GOOGLE_CREDENTIALS"]
-        # Chuyển nội dung JSON thành dictionary
-        credentials_info = json.loads(credentials_json)
-        # Tạo thông tin xác thực từ dictionary
-        credentials = Credentials.from_service_account_info(credentials_info)
-        return credentials
-    except KeyError:
-        raise ValueError("GOOGLE_CREDENTIALS không được tìm thấy trong Streamlit Secrets!")
-    except json.JSONDecodeError:
-        raise ValueError("Dữ liệu GOOGLE_CREDENTIALS không hợp lệ!")
 
 # Hàm kết nối đến Google Docs API
+
 def connect_to_google_docs():
-    credentials = get_credentials_from_secrets()
+    # Sử dụng thông tin từ Secrets trên Streamlit Cloud
+    credentials_info = {
+        "type": st.secrets["gcp_service_account"]["type"],
+        "project_id": st.secrets["gcp_service_account"]["project_id"],
+        "private_key_id": st.secrets["gcp_service_account"]["private_key_id"],
+        "private_key": st.secrets["gcp_service_account"]["private_key"],
+        "client_email": st.secrets["gcp_service_account"]["client_email"],
+        "client_id": st.secrets["gcp_service_account"]["client_id"],
+        "auth_uri": st.secrets["gcp_service_account"]["auth_uri"],
+        "token_uri": st.secrets["gcp_service_account"]["token_uri"],
+        "auth_provider_x509_cert_url": st.secrets["gcp_service_account"]["auth_provider_x509_cert_url"],
+        "client_x509_cert_url": st.secrets["gcp_service_account"]["client_x509_cert_url"]
+    }
+
+    credentials = Credentials.from_service_account_info(credentials_info, scopes=["https://www.googleapis.com/auth/documents"])
     service = build("docs", "v1", credentials=credentials)
     return service
 
@@ -29,7 +28,7 @@ def connect_to_google_docs():
 def get_current_entry_number(doc_id):
     service = connect_to_google_docs()
     document = service.documents().get(documentId=doc_id).execute()
-    content = document.get("body").get("content", [])
+    content = document.get("body").get("content")
 
     # Ghép nội dung thành chuỗi văn bản nếu có nội dung
     text = ""
@@ -57,7 +56,7 @@ def write_to_google_docs(doc_id, date, content):
     entry_number = get_current_entry_number(doc_id)
     document = service.documents().get(documentId=doc_id).execute()
     # Kiểm tra vị trí cuối nếu tài liệu rỗng
-    end_index = document.get("body").get("content")[-1].get("endIndex", 1) - 1 if document.get("body").get("content") else 1
+    end_index = document.get("body").get("content")[-1].get("endIndex") - 1 if len(document.get("body").get("content")) > 1 else 1
 
     # Định dạng nội dung
     formatted_content = "\n".join([f"- {line}" for line in content.split("\n")])
