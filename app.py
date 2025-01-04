@@ -1,27 +1,27 @@
 import os
-import base64
+import json
 from datetime import datetime
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 import streamlit as st
 
-# Hàm đọc và giải mã thông tin tài khoản từ Streamlit Secrets
-def get_credentials_from_secrets():
-    # Lấy chuỗi Base64 từ Streamlit Secrets
-    encoded_json = st.secrets["GOOGLE_CREDENTIALS"]
-    if not encoded_json:
-        raise ValueError("GOOGLE_CREDENTIALS không được tìm thấy trong secrets.")
-    
-    # Giải mã chuỗi Base64 để tái tạo nội dung file JSON
-    json_data = base64.b64decode(encoded_json).decode("utf-8")
-    
-    # Tạo thông tin xác thực từ nội dung JSON
-    credentials = Credentials.from_service_account_info(eval(json_data))
+# Hàm đọc thông tin từ biến môi trường GOOGLE_CREDENTIALS
+def get_credentials_from_env():
+    # Lấy nội dung JSON từ biến môi trường
+    credentials_json = os.getenv("GOOGLE_CREDENTIALS")
+    if not credentials_json:
+        raise ValueError("GOOGLE_CREDENTIALS không được tìm thấy trong môi trường!")
+
+    # Chuyển nội dung JSON thành dictionary
+    credentials_info = json.loads(credentials_json)
+
+    # Tạo thông tin xác thực từ dictionary
+    credentials = Credentials.from_service_account_info(credentials_info)
     return credentials
 
 # Hàm kết nối đến Google Docs API
 def connect_to_google_docs():
-    credentials = get_credentials_from_secrets()
+    credentials = get_credentials_from_env()
     service = build("docs", "v1", credentials=credentials)
     return service
 
@@ -30,7 +30,7 @@ def get_current_entry_number(doc_id):
     service = connect_to_google_docs()
     document = service.documents().get(documentId=doc_id).execute()
     content = document.get("body").get("content")
-    
+
     # Ghép nội dung thành chuỗi văn bản nếu có nội dung
     text = ""
     for element in content:
@@ -58,7 +58,7 @@ def write_to_google_docs(doc_id, date, content):
     document = service.documents().get(documentId=doc_id).execute()
     # Kiểm tra vị trí cuối nếu tài liệu rỗng
     end_index = document.get("body").get("content")[-1].get("endIndex") - 1 if len(document.get("body").get("content")) > 1 else 1
-    
+
     # Định dạng nội dung
     formatted_content = "\n".join([f"- {line}" for line in content.split("\n")])
     requests = [
@@ -72,7 +72,7 @@ def write_to_google_docs(doc_id, date, content):
         # Thêm "Nội dung" in đậm và gạch dưới
         {
             "insertText": {
-                "location": {"index": end_index + len(f"{entry_number}. Ngày: {date}\n")}, 
+                "location": {"index": end_index + len(f"{entry_number}. Ngày: {date}\n")},
                 "text": "Nội dung:\n"
             }
         },
