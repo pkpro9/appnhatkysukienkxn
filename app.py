@@ -88,7 +88,7 @@ def write_to_google_docs(doc_id, date, content):
 # Giao diện Streamlit
 st.title("Quản lý thông tin")
 
-menu = st.sidebar.radio("Chọn chức năng", ["Nhật ký sự kiện Khoa XN", "Giao ban viện"])
+menu = st.sidebar.radio("Chọn chức năng", ["Nhật ký sự kiện Khoa XN", "Giao ban viện", "Biên bản họp KXN"])
 
 if menu == "Nhật ký sự kiện Khoa XN":
     st.header("Nhật ký sự kiện Khoa XN")
@@ -142,6 +142,32 @@ elif menu == "Giao ban viện":
                 doc_id = "1wdpbDQeLhyHhrjN_6GPZbH4s_ZiqkOyU4J2NvlPmpWY"
                 content = f"Chuyên môn: {expertise}\nPhổ biến: {dissemination}"
                 write_to_google_docs(doc_id, st.session_state.meeting_date, content)
+                st.success("Đã lưu thành công vào Google Docs!")
+            except Exception as e:
+                st.error(f"Có lỗi xảy ra: {e}")
+
+elif menu == "Biên bản họp KXN":
+    st.header("Biên bản họp KXN")
+
+    if "meeting_minutes_date" not in st.session_state:
+        timezone = pytz.timezone("Asia/Ho_Chi_Minh")
+        st.session_state.meeting_minutes_date = datetime.now(timezone).strftime("%d-%m-%Y %H:%M:%S")
+
+    meeting_minutes_date = st.text_input("Ngày:", value=st.session_state.meeting_minutes_date)
+    st.session_state.meeting_minutes_date = meeting_minutes_date
+
+    location = st.text_area("Địa điểm")
+    attendees = st.text_area("Thành phần tham dự")
+    meeting_content = st.text_area("Nội dung cuộc họp")
+
+    if st.button("Lưu vào Google Docs (Biên bản họp KXN)"):
+        if not location and not attendees and not meeting_content:
+            st.warning("Vui lòng nhập đầy đủ thông tin cuộc họp!")
+        else:
+            try:
+                doc_id = "17bJaGses0Pss7AxiWvrKNiV75PBdszYytiovAbITGlE"
+                content = f"Địa điểm: {location}\nThành phần tham dự: {attendees}\nNội dung cuộc họp: {meeting_content}"
+                write_to_google_docs(doc_id, st.session_state.meeting_minutes_date, content)
                 st.success("Đã lưu thành công vào Google Docs!")
             except Exception as e:
                 st.error(f"Có lỗi xảy ra: {e}")
