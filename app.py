@@ -50,7 +50,10 @@ def write_to_google_docs(doc_id, date, content):
     service = connect_to_google_docs()
     entry_number = get_current_entry_number(doc_id)
     document = service.documents().get(documentId=doc_id).execute()
-    end_index = document.get("body").get("content")[-1].get("endIndex") - 1 if len(document.get("body").get("content")) > 1 else 1
+    content_elements = document.get("body").get("content")
+
+    # Xác định chỉ số chèn hợp lệ cuối tài liệu
+    end_index = content_elements[-1].get("endIndex", 1) - 1 if content_elements else 1
 
     requests = [
         {
@@ -61,37 +64,37 @@ def write_to_google_docs(doc_id, date, content):
         },
         {
             "insertText": {
-                "location": {"index": end_index + len(f"{entry_number}. Ngày: {date}\n")},
+                "location": {"index": end_index},
                 "text": "- Địa điểm:\n"
             }
         },
         {
             "insertText": {
-                "location": {"index": end_index + len(f"{entry_number}. Ngày: {date}\n- Địa điểm:\n")},
+                "location": {"index": end_index},
                 "text": content["location"]
             }
         },
         {
             "insertText": {
-                "location": {"index": end_index + len(f"{entry_number}. Ngày: {date}\n- Địa điểm:\n{content['location']}\n")},
+                "location": {"index": end_index},
                 "text": "- Thành phần tham dự:\n"
             }
         },
         {
             "insertText": {
-                "location": {"index": end_index + len(f"{entry_number}. Ngày: {date}\n- Địa điểm:\n{content['location']}\n- Thành phần tham dự:\n")},
+                "location": {"index": end_index},
                 "text": content["attendees"]
             }
         },
         {
             "insertText": {
-                "location": {"index": end_index + len(f"{entry_number}. Ngày: {date}\n- Địa điểm:\n{content['location']}\n- Thành phần tham dự:\n{content['attendees']}\n")},
+                "location": {"index": end_index},
                 "text": "- Nội dung cuộc họp:\n"
             }
         },
         {
             "insertText": {
-                "location": {"index": end_index + len(f"{entry_number}. Ngày: {date}\n- Địa điểm:\n{content['location']}\n- Thành phần tham dự:\n{content['attendees']}\n- Nội dung cuộc họp:\n")},
+                "location": {"index": end_index},
                 "text": content["meeting_content"]
             }
         }
