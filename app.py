@@ -55,9 +55,12 @@ def write_to_google_docs(doc_id, date, content):
     # Xác định chỉ số chèn hợp lệ cuối tài liệu
     end_index = content_elements[-1].get("endIndex", 1) - 1 if content_elements else 1
 
-    formatted_text = (f"{entry_number}. Ngày: {date}\n"
-                      f"- Chuyên môn:\n{content['expertise']}\n\n"
-                      f"- Phổ biến:\n{content['dissemination']}\n\n")
+    if isinstance(content, str):  # Trường hợp "Nhật ký sự kiện Khoa XN"
+        formatted_text = f"{entry_number}. Ngày: {date}\n- Nội dung sự kiện:\n+ {content.replace('\n', '\n+ ')}\n\n"
+    else:  # Các menu khác
+        formatted_text = (f"{entry_number}. Ngày: {date}\n"
+                          f"- Chuyên môn:\n{content['expertise']}\n\n"
+                          f"- Phổ biến:\n{content['dissemination']}\n\n")
 
     requests = [
         {
