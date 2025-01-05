@@ -52,7 +52,6 @@ def write_to_google_docs(doc_id, date, content):
     document = service.documents().get(documentId=doc_id).execute()
     end_index = document.get("body").get("content")[-1].get("endIndex") - 1 if len(document.get("body").get("content")) > 1 else 1
 
-    formatted_content = "\n".join([f"- {line}" for line in content.split("\n")])
     requests = [
         {
             "insertText": {
@@ -63,23 +62,37 @@ def write_to_google_docs(doc_id, date, content):
         {
             "insertText": {
                 "location": {"index": end_index + len(f"{entry_number}. Ngày: {date}\n")},
-                "text": "Nội dung:\n"
-            }
-        },
-        {
-            "updateTextStyle": {
-                "range": {
-                    "startIndex": end_index + len(f"{entry_number}. Ngày: {date}\n"),
-                    "endIndex": end_index + len(f"{entry_number}. Ngày: {date}\nNội dung:")
-                },
-                "textStyle": {"bold": True, "underline": True},
-                "fields": "bold,underline"
+                "text": "- Địa điểm:\n"
             }
         },
         {
             "insertText": {
-                "location": {"index": end_index + len(f"{entry_number}. Ngày: {date}\nNội dung:\n")},
-                "text": f"{formatted_content}\n\n"
+                "location": {"index": end_index + len(f"{entry_number}. Ngày: {date}\n- Địa điểm:\n")},
+                "text": content["location"]
+            }
+        },
+        {
+            "insertText": {
+                "location": {"index": end_index + len(f"{entry_number}. Ngày: {date}\n- Địa điểm:\n{content['location']}\n")},
+                "text": "- Thành phần tham dự:\n"
+            }
+        },
+        {
+            "insertText": {
+                "location": {"index": end_index + len(f"{entry_number}. Ngày: {date}\n- Địa điểm:\n{content['location']}\n- Thành phần tham dự:\n")},
+                "text": content["attendees"]
+            }
+        },
+        {
+            "insertText": {
+                "location": {"index": end_index + len(f"{entry_number}. Ngày: {date}\n- Địa điểm:\n{content['location']}\n- Thành phần tham dự:\n{content['attendees']}\n")},
+                "text": "- Nội dung cuộc họp:\n"
+            }
+        },
+        {
+            "insertText": {
+                "location": {"index": end_index + len(f"{entry_number}. Ngày: {date}\n- Địa điểm:\n{content['location']}\n- Thành phần tham dự:\n{content['attendees']}\n- Nội dung cuộc họp:\n")},
+                "text": content["meeting_content"]
             }
         }
     ]
@@ -166,7 +179,11 @@ elif menu == "Biên bản họp KXN":
         else:
             try:
                 doc_id = "17bJaGses0Pss7AxiWvrKNiV75PBdszYytiovAbITGlE"
-                content = f"Địa điểm: {location}\nThành phần tham dự: {attendees}\nNội dung cuộc họp: {meeting_content}"
+                content = {
+                    "location": f"\n+ {location.replace('\n', '\n+ ')}\n",
+                    "attendees": f"\n+ {attendees.replace('\n', '\n+ ')}\n",
+                    "meeting_content": f"\n+ {meeting_content.replace('\n', '\n+ ')}\n"
+                }
                 write_to_google_docs(doc_id, st.session_state.meeting_minutes_date, content)
                 st.success("Đã lưu thành công vào Google Docs!")
             except Exception as e:
