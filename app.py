@@ -56,9 +56,8 @@ def write_to_google_docs(doc_id, date, content):
     end_index = content_elements[-1].get("endIndex", 1) - 1 if content_elements else 1
 
     formatted_text = (f"{entry_number}. Ngày: {date}\n"
-                      f"- Địa điểm:\n{content['location']}\n\n"
-                      f"- Thành phần tham dự:\n{content['attendees']}\n\n"
-                      f"- Nội dung cuộc họp:\n{content['meeting_content']}\n\n")
+                      f"- Chuyên môn:\n{content['expertise']}\n\n"
+                      f"- Phổ biến:\n{content['dissemination']}\n\n")
 
     requests = [
         {
@@ -125,7 +124,10 @@ elif menu == "Giao ban viện":
         else:
             try:
                 doc_id = "1wdpbDQeLhyHhrjN_6GPZbH4s_ZiqkOyU4J2NvlPmpWY"
-                content = f"Chuyên môn: {expertise}\nPhổ biến: {dissemination}"
+                content = {
+                    "expertise": f"+ {expertise.replace('\n', '\n+ ')}",
+                    "dissemination": f"+ {dissemination.replace('\n', '\n+ ')}"
+                }
                 write_to_google_docs(doc_id, st.session_state.meeting_date, content)
                 st.success("Đã lưu thành công vào Google Docs!")
             except Exception as e:
