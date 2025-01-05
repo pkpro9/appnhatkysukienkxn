@@ -55,47 +55,16 @@ def write_to_google_docs(doc_id, date, content):
     # Xác định chỉ số chèn hợp lệ cuối tài liệu
     end_index = content_elements[-1].get("endIndex", 1) - 1 if content_elements else 1
 
+    formatted_text = (f"{entry_number}. Ngày: {date}\n"
+                      f"- Địa điểm:\n{content['location']}\n\n"
+                      f"- Thành phần tham dự:\n{content['attendees']}\n\n"
+                      f"- Nội dung cuộc họp:\n{content['meeting_content']}\n\n")
+
     requests = [
         {
             "insertText": {
                 "location": {"index": end_index},
-                "text": f"{entry_number}. Ngày: {date}\n"
-            }
-        },
-        {
-            "insertText": {
-                "location": {"index": end_index},
-                "text": "- Địa điểm:\n"
-            }
-        },
-        {
-            "insertText": {
-                "location": {"index": end_index},
-                "text": content["location"]
-            }
-        },
-        {
-            "insertText": {
-                "location": {"index": end_index},
-                "text": "- Thành phần tham dự:\n"
-            }
-        },
-        {
-            "insertText": {
-                "location": {"index": end_index},
-                "text": content["attendees"]
-            }
-        },
-        {
-            "insertText": {
-                "location": {"index": end_index},
-                "text": "- Nội dung cuộc họp:\n"
-            }
-        },
-        {
-            "insertText": {
-                "location": {"index": end_index},
-                "text": content["meeting_content"]
+                "text": formatted_text
             }
         }
     ]
@@ -183,9 +152,9 @@ elif menu == "Biên bản họp KXN":
             try:
                 doc_id = "17bJaGses0Pss7AxiWvrKNiV75PBdszYytiovAbITGlE"
                 content = {
-                    "location": f"\n+ {location.replace('\n', '\n+ ')}\n",
-                    "attendees": f"\n+ {attendees.replace('\n', '\n+ ')}\n",
-                    "meeting_content": f"\n+ {meeting_content.replace('\n', '\n+ ')}\n"
+                    "location": f"+ {location.replace('\n', '\n+ ')}",
+                    "attendees": f"+ {attendees.replace('\n', '\n+ ')}",
+                    "meeting_content": f"+ {meeting_content.replace('\n', '\n+ ')}"
                 }
                 write_to_google_docs(doc_id, st.session_state.meeting_minutes_date, content)
                 st.success("Đã lưu thành công vào Google Docs!")
