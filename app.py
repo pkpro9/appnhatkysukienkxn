@@ -55,18 +55,7 @@ def write_to_google_docs(doc_id, date, content):
     # Xác định chỉ số chèn hợp lệ cuối tài liệu
     end_index = content_elements[-1].get("endIndex", 1) - 1 if content_elements else 1
 
-    if isinstance(content, dict):
-        if "expertise" in content and "dissemination" in content:  # Trường hợp "Giao ban viện"
-            formatted_text = (f"{entry_number}. Ngày: {date}\n"
-                              f"- Chuyên môn:\n{content['expertise']}\n\n"
-                              f"- Phổ biến:\n{content['dissemination']}\n\n")
-        else:  # Trường hợp "Biên bản họp KXN"
-            formatted_text = (f"{entry_number}. Ngày: {date}\n"
-                              f"- Địa điểm:\n{content['location']}\n\n"
-                              f"- Thành phần tham dự:\n{content['attendees']}\n\n"
-                              f"- Nội dung cuộc họp:\n{content['meeting_content']}\n\n")
-    else:  # Trường hợp "Nhật ký sự kiện Khoa XN"
-        formatted_text = f"{entry_number}. Ngày: {date}\n- Nội dung sự kiện:\n+ {content.replace('\n', '\n+ ')}\n\n"
+    formatted_text = f"{entry_number}. Ngày: {date}\n- Nội dung sự kiện:\n+ {content.replace('\n', '\n+ ')}\n\n"
 
     requests = [
         {
@@ -81,10 +70,10 @@ def write_to_google_docs(doc_id, date, content):
 # Giao diện Streamlit
 st.title("Quản lý thông tin")
 
-menu = st.sidebar.radio("Chọn chức năng", ["Nhật ký sự kiện Khoa XN", "Giao ban viện", "Biên bản họp KXN"])
+menu = st.sidebar.radio("Chọn chức năng", ["Nhật ký sự kiện", "Giao ban viện", "Biên bản họp KXN"])
 
-if menu == "Nhật ký sự kiện Khoa XN":
-    st.header("Nhật ký sự kiện Khoa XN")
+if menu == "Nhật ký sự kiện":
+    st.header("Nhật ký sự kiện")
 
     if "event_content" not in st.session_state:
         st.session_state.event_content = ""
@@ -92,6 +81,7 @@ if menu == "Nhật ký sự kiện Khoa XN":
         timezone = pytz.timezone("Asia/Ho_Chi_Minh")
         st.session_state.event_date = datetime.now(timezone).strftime("%d-%m-%Y %H:%M:%S")
 
+    option = st.selectbox("Chọn loại nhật ký:", ["Khoa XN", "Cá nhân"])
     event_date = st.text_input("Ngày:", value=st.session_state.event_date)
     st.session_state.event_date = event_date
 
@@ -102,9 +92,9 @@ if menu == "Nhật ký sự kiện Khoa XN":
             st.warning("Vui lòng nhập nội dung sự kiện!")
         else:
             try:
-                doc_id = "1YRqAYASyH72iDfxnlFPaXwpnOlWp0A3XctIdwB8qcWI"
+                doc_id = "1YRqAYASyH72iDfxnlFPaXwpnOlWp0A3XctIdwB8qcWI" if option == "Khoa XN" else "1hVKA8Of1KSkpJN4UDxhgR1oqV0nMqSFFev0QqozaY4s"
                 write_to_google_docs(doc_id, st.session_state.event_date, event_content)
-                st.success("Đã lưu thành công vào Google Docs!")
+                st.success(f"Đã lưu thành công vào Google Docs ({option})!")
                 st.session_state.event_content = ""
             except Exception as e:
                 st.error(f"Có lỗi xảy ra: {e}")
