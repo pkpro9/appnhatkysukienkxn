@@ -55,7 +55,15 @@ def write_to_google_docs(doc_id, date, content):
     # Xác định chỉ số chèn hợp lệ cuối tài liệu
     end_index = content_elements[-1].get("endIndex", 1) - 1 if content_elements else 1
 
-    formatted_text = f"{entry_number}. Ngày: {date}\n- Nội dung sự kiện:\n+ {content.replace('\n', '\n+ ')}\n\n"
+    if isinstance(content, dict):
+        formatted_text = (f"{entry_number}. Ngày: {date}\n"
+                          f"- Chuyên môn:\n+ {content.get('expertise', '').replace('\n', '\n+ ')}\n\n"
+                          f"- Phổ biến:\n+ {content.get('dissemination', '').replace('\n', '\n+ ')}\n\n"
+                          f"- Địa điểm:\n+ {content.get('location', '').replace('\n', '\n+ ')}\n\n"
+                          f"- Thành phần tham dự:\n+ {content.get('attendees', '').replace('\n', '\n+ ')}\n\n"
+                          f"- Nội dung cuộc họp:\n+ {content.get('meeting_content', '').replace('\n', '\n+ ')}\n\n")
+    else:
+        formatted_text = f"{entry_number}. Ngày: {date}\n- Nội dung sự kiện:\n+ {content.replace('\n', '\n+ ')}\n\n"
 
     requests = [
         {
@@ -129,8 +137,8 @@ elif menu == "Giao ban viện":
             try:
                 doc_id = "1wdpbDQeLhyHhrjN_6GPZbH4s_ZiqkOyU4J2NvlPmpWY"
                 content = {
-                    "expertise": expertise.replace('\n', '\n+ '),
-                    "dissemination": dissemination.replace('\n', '\n+ ')
+                    "expertise": expertise,
+                    "dissemination": dissemination
                 }
                 write_to_google_docs(doc_id, st.session_state.meeting_date, content)
                 st.success("Đã lưu thành công vào Google Docs!")
@@ -158,9 +166,9 @@ elif menu == "Biên bản họp KXN":
             try:
                 doc_id = "17bJaGses0Pss7AxiWvrKNiV75PBdszYytiovAbITGlE"
                 content = {
-                    "location": location.replace('\n', '\n+ '),
-                    "attendees": attendees.replace('\n', '\n+ '),
-                    "meeting_content": meeting_content.replace('\n', '\n+ ')
+                    "location": location,
+                    "attendees": attendees,
+                    "meeting_content": meeting_content
                 }
                 write_to_google_docs(doc_id, st.session_state.meeting_minutes_date, content)
                 st.success("Đã lưu thành công vào Google Docs!")
