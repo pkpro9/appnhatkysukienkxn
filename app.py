@@ -55,18 +55,7 @@ def write_to_google_docs(doc_id, date, content):
     # Xác định chỉ số chèn hợp lệ cuối tài liệu
     end_index = content_elements[-1].get("endIndex", 1) - 1 if content_elements else 1
 
-    if isinstance(content, dict):
-        if "expertise" in content and "dissemination" in content:  # Trường hợp "Giao ban viện"
-            formatted_text = (f"{entry_number}. Ngày: {date}\n"
-                              f"- Chuyên môn:\n{content['expertise']}\n\n"
-                              f"- Phổ biến:\n{content['dissemination']}\n\n")
-        else:  # Trường hợp "Biên bản họp KXN"
-            formatted_text = (f"{entry_number}. Ngày: {date}\n"
-                              f"- Địa điểm:\n{content['location']}\n\n"
-                              f"- Thành phần tham dự:\n{content['attendees']}\n\n"
-                              f"- Nội dung cuộc họp:\n{content['meeting_content']}\n\n")
-    else:  # Trường hợp "Nhật ký sự kiện"
-        formatted_text = f"{entry_number}. Ngày: {date}\n- Nội dung sự kiện:\n+ {content.replace('\n', '\n+ ')}\n\n"
+    formatted_text = f"{entry_number}. Ngày: {date}\n- Nội dung sự kiện:\n+ {content.replace('\n', '\n+ ')}\n\n"
 
     requests = [
         {
@@ -92,7 +81,7 @@ if menu == "Nhật ký sự kiện":
         timezone = pytz.timezone("Asia/Ho_Chi_Minh")
         st.session_state.event_date = datetime.now(timezone).strftime("%d-%m-%Y %H:%M:%S")
 
-    option = st.selectbox("Chọn loại nhật ký:", ["Khoa XN", "Cá nhân"])
+    option = st.selectbox("Chọn loại nhật ký:", ["Khoa XN", "Cá nhân-Công việc", "Cá nhân-Gia đình"])
     event_date = st.text_input("Ngày:", value=st.session_state.event_date)
     st.session_state.event_date = event_date
 
@@ -103,7 +92,12 @@ if menu == "Nhật ký sự kiện":
             st.warning("Vui lòng nhập nội dung sự kiện!")
         else:
             try:
-                doc_id = "1YRqAYASyH72iDfxnlFPaXwpnOlWp0A3XctIdwB8qcWI" if option == "Khoa XN" else "1hVKA8Of1KSkpJN4UDxhgR1oqV0nMqSFFev0QqozaY4s"
+                if option == "Khoa XN":
+                    doc_id = "1YRqAYASyH72iDfxnlFPaXwpnOlWp0A3XctIdwB8qcWI"
+                elif option == "Cá nhân-Công việc":
+                    doc_id = "1hVKA8Of1KSkpJN4UDxhgR1oqV0nMqSFFev0QqozaY4s"
+                else:  # "Cá nhân-Gia đình"
+                    doc_id = "17cauXMmUyHUsUQ_cPVHwOg-d4F3pvZGIyOU8-buNOz0"
                 write_to_google_docs(doc_id, st.session_state.event_date, event_content)
                 st.success(f"Đã lưu thành công vào Google Docs ({option})!")
                 st.session_state.event_content = ""
