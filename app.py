@@ -56,13 +56,16 @@ def write_to_google_docs(doc_id, date, content):
     end_index = content_elements[-1].get("endIndex", 1) - 1 if content_elements else 1
 
     if isinstance(content, dict):
-        formatted_text = (f"{entry_number}. Ngày: {date}\n"
-                          f"- Chuyên môn:\n+ {content.get('expertise', '').replace('\n', '\n+ ')}\n\n"
-                          f"- Phổ biến:\n+ {content.get('dissemination', '').replace('\n', '\n+ ')}\n\n"
-                          f"- Địa điểm:\n+ {content.get('location', '').replace('\n', '\n+ ')}\n\n"
-                          f"- Thành phần tham dự:\n+ {content.get('attendees', '').replace('\n', '\n+ ')}\n\n"
-                          f"- Nội dung cuộc họp:\n+ {content.get('meeting_content', '').replace('\n', '\n+ ')}\n\n")
-    else:
+        if "expertise" in content and "dissemination" in content:  # Trường hợp "Giao ban viện"
+            formatted_text = (f"{entry_number}. Ngày: {date}\n"
+                              f"- Chuyên môn:\n+ {content['expertise'].replace('\n', '\n+ ')}\n\n"
+                              f"- Phổ biến:\n+ {content['dissemination'].replace('\n', '\n+ ')}\n\n")
+        else:  # Trường hợp "Biên bản họp KXN"
+            formatted_text = (f"{entry_number}. Ngày: {date}\n"
+                              f"- Địa điểm:\n+ {content['location'].replace('\n', '\n+ ')}\n\n"
+                              f"- Thành phần tham dự:\n+ {content['attendees'].replace('\n', '\n+ ')}\n\n"
+                              f"- Nội dung cuộc họp:\n+ {content['meeting_content'].replace('\n', '\n+ ')}\n\n")
+    else:  # Trường hợp "Nhật ký sự kiện"
         formatted_text = f"{entry_number}. Ngày: {date}\n- Nội dung sự kiện:\n+ {content.replace('\n', '\n+ ')}\n\n"
 
     requests = [
